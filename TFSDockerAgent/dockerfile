@@ -1,0 +1,47 @@
+ARG IMAGE_VER=16.04
+FROM openjdk:8-jdk
+
+ARG AGENT_URL=https://github.com/Microsoft/vsts-agent/releases/download/v2.125.0/vsts-agent-linux-x64-2.125.0.tar.gz
+ARG DOCKERVERSION=17.09.0~ce-0~ubuntu
+#USER root
+
+RUN apt-get update && apt-get install apt-utils \
+                                wget \
+                                curl \
+                                libunwind8 \
+                                libcurl3 \
+                                libcurl4-openssl-dev \
+                                software-properties-common \
+                                apt-transport-https \
+                                ca-certificates \
+                                sudo -y
+
+RUN apt-get upgrade -y
+
+RUN add-apt-repository ppa:git-core/ppa && apt-get update && apt-get install git -y --allow-unauthenticated
+
+RUN useradd -ms /bin/bash  agent && echo "agent:agent" | chpasswd
+RUN usermod -aG sudo agent
+
+RUN mkdir /myagent
+
+WORKDIR /myagent
+
+ADD ${AGENT_URL} vsts-agent-ubuntu.16.04-x64-2.112.0.tar.gz
+RUN tar zxvf vsts-agent-ubuntu.16.04-x64-2.112.0.tar.gz
+
+ADD install-docker2.sh /usr/local/bin/install-docker2.sh
+RUN chmod +x /usr/local/bin/install-docker2.sh
+RUN /usr/local/bin/install-docker2.sh
+
+RUN chown -R agent:agent /myagent
+RUN usermod -aG docker agent
+
+USER agent
+
+WORKDIR /myagent
+
+#ENTRYPOINT [ "/myagent/install-agent.sh" ]
+
+#CMD ["/bin/bash"]
+#CMD["/sbin/init"]

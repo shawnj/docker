@@ -1,0 +1,82 @@
+ARG IMAGE_VER=16.04
+FROM ubuntu:${IMAGE_VER}
+
+ARG AGENT_URL=https://github.com/Microsoft/vsts-agent/releases/download/v2.125.1/vsts-agent-linux-x64-2.125.1.tar.gz
+ARG TERRAFORM_VER=0.10.8
+ARG chefdkversion=2.3.4
+#USER root
+
+RUN apt-get update && apt-get install apt-utils \
+                                wget \
+                                curl \
+                                libunwind8 \
+                                libcurl3 \
+                                libcurl4-openssl-dev \
+                                software-properties-common \
+                                build-essential \
+                                openssl \
+                                python \
+                                jq \
+                                unzip \
+                                libssl-dev \
+                                libffi-dev \
+                                python-dev \
+                                ca-certificates \
+                                sudo -y
+
+RUN apt-get upgrade -y
+
+RUN add-apt-repository ppa:git-core/ppa && apt-get update && apt-get install git -y
+
+RUN useradd -ms /bin/bash  agent && echo "agent:agent" | chpasswd
+RUN usermod -aG sudo agent
+
+RUN mkdir /myagent
+
+WORKDIR /myagent
+
+ADD ${AGENT_URL} vsts-agent-linux-x64-2.125.1.tar.gz
+RUN tar zxvf vsts-agent-linux-x64-2.125.1.tar.gz
+
+###################################################
+## Prior to running build, update .chef/knife.rb ##
+## and copy Chef <user>.pem to .chef folder      ##
+###################################################
+
+ADD install-chefdk.sh /usr/local/bin/install-chefdk.sh
+RUN chmod +x /usr/local/bin/install-chefdk.sh
+RUN /usr/local/bin/install-chefdk.sh ${chefdkversion}
+
+ADD install-terraform.sh /usr/local/bin/install-terraform.sh
+RUN chmod +x /usr/local/bin/install-terraform.sh
+RUN /usr/local/bin/install-terraform.sh ${TERRAFORM_VER}
+
+ADD install-azcli.py /usr/local/bin/install-azcli.py
+RUN chmod +x /usr/local/bin/install-azcli.py
+RUN python /usr/local/bin/install-azcli.py
+
+RUN mkdir -p /home/agent/.chef
+RUN mkdir -p /home/agent/.berkshelf
+ADD config.json /home/agent/.berkshelf/config.json
+ADD .chef /home/agent/.chef
+RUN chown -R agent /home/agent/.chef
+RUN chown -R agent /home/agent/.berkshelf
+
+RUN ./bin/installdependencies.sh
+
+#ADD install-agent.sh /myagent/install-agent.sh
+
+RUN chown -R agent:agent /myagent
+
+USER agent
+
+RUN cd /home/agent && knife ssl fetch
+
+ENV PATH "$PATH:/usr/local/bin/terraform"
+ENV PATH "$PATH:/usr/local/bin/az"
+
+WORKDIR /myagent
+
+#ENTRYPOINT [ "/myagent/install-agent.sh" ]
+
+CMD ["/bin/bash"]

@@ -1,0 +1,24 @@
+ARG IMAGE_VER=3.14-1
+FROM jenkinsci/slave:${IMAGE_VER}
+
+ARG chefdkversion=2.3.4
+ARG terraformversion=0.10.8
+ARG dockerversion=0.10.8
+
+USER root
+
+RUN apt-get update && apt-get install apt-utils wget python libssl-dev libffi-dev python-dev build-essential openssl jq \   
+    ca-certificates \
+    curl \ 
+    software-properties-common -y
+
+
+ADD install-docker.sh /usr/local/bin/install-docker.sh
+RUN chmod +x /usr/local/bin/install-docker.sh
+RUN /usr/local/bin/install-docker.sh
+
+RUN usermod -aG docker jenkins
+
+#USER jenkins
+
+#ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
