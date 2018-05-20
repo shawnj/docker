@@ -1,3 +1,4 @@
+# REF: https://github.com/sbt/sbt/issues/3420
 FROM amazonlinux:2017.09
 
 ENV SCALA_VERSION 2.11.8
