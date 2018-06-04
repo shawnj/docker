@@ -28,7 +28,7 @@ ADD install-azcli.py /usr/local/bin/install-azcli.py
 RUN chmod +x /usr/local/bin/install-azcli.py
 RUN python /usr/local/bin/install-azcli.py
 
-ADD pipinstall.s /usr/local/bin/pipinstall.sh
+ADD pipinstall.sh /usr/local/bin/pipinstall.sh
 RUN chmod +x /usr/local/bin/pipinstall.sh
 RUN /usr/local/bin/pipinstall.sh
 
