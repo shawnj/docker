@@ -39,6 +39,8 @@ RUN /usr/local/bin/create_sslcert.sh
 RUN mkdir -p /home/jenkins/.chef
 RUN chown -R jenkins /home/jenkins/.chef
 
+RUN chown -R jenkins /etc/ssl
+
 USER jenkins
 
 ENV PATH "$PATH:/usr/local/bin/terraform"
