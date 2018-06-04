@@ -43,6 +43,6 @@ ENV PATH "$PATH:/usr/local/bin/az"
 ADD config.json /home/jenkins/.berkshelf/config.json
 ADD .chef /home/jenkins/.chef
 
-RUN cd /home/jenkins && knife ssl fetch
+#RUN cd /home/jenkins && knife ssl fetch
 
 ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
