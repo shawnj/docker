@@ -32,6 +32,10 @@ ADD pipinstall.sh /usr/local/bin/pipinstall.sh
 RUN chmod +x /usr/local/bin/pipinstall.sh
 RUN /usr/local/bin/pipinstall.sh
 
+ADD create_sslcert.sh /usr/local/bin/create_sslcert.sh
+RUN chmod +x /usr/local/bin/create_sslcert.sh
+RUN /usr/local/bin/create_sslcert.sh
+
 RUN mkdir -p /home/jenkins/.chef
 RUN chown -R jenkins /home/jenkins/.chef
 
