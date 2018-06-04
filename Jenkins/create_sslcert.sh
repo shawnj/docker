@@ -9,4 +9,4 @@ openssl req \
        -x509 -sha256 -days 365 -out domain.pem
 
 cp domain.key /etc/ssl/domain.key
-cp domain.crt /etc/ssl/domain.pem
+cp domain.pem /etc/ssl/domain.pem
